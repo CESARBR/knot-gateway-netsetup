@@ -35,15 +35,15 @@ class OpenthreadBus(dbus.service.Object):
         self.path = '/br/org/cesar/knot/netsetup/openthread'
         dbus.service.Object.__init__(self, bus, self.path)
 
-    def __fmt_to_bytes(fmt, arg):
+    def __fmt_to_bytes(self, fmt, arg):
         """
             Convert the values in fmt to bytes.
-            The formats strings can be found in 
+            The formats strings can be found in
             https://docs.python.org/2/library/struct.html#format-strings
         """
         return struct.pack(fmt, arg)
 
-    def __bytes_to_dbus_byte_array(arg):
+    def __bytes_to_dbus_byte_array(self, arg):
         """
             Convert python Bytes in dbus bytes array
         """
@@ -66,18 +66,18 @@ class OpenthreadBus(dbus.service.Object):
         if self.wpan is not None:
             return {
                 OPENTHREAD_IFACE: {
-                    'network_name': __bytes_to_dbus_byte_array(
-                                            bytes(self.wpan.network_name)),
-                    'pan_id': __bytes_to_dbus_byte_array(
-                                        __fmt_to_bytes(">H", self.wpan.pan_id)),
-                    'channel': __bytes_to_dbus_byte_array(
-                                        __fmt_to_bytes(">l", self.wpan.channel)),
-                    'xpan_id': __bytes_to_dbus_byte_array(
-                                        __fmt_to_bytes(">Q", self.wpan.xpan_id)),
-                    'mesh_ipv6': __bytes_to_dbus_byte_array(
-                                            bytes(self.wpan.mesh_ipv6)),
-                    'masterkey': __bytes_to_dbus_byte_array(
-                                            bytes(self.wpan.masterkey))
+                    'network_name': self.__bytes_to_dbus_byte_array(
+                                bytes(self.wpan.network_name)),
+                    'pan_id': self.__bytes_to_dbus_byte_array(
+                                self.__fmt_to_bytes(">H", self.wpan.pan_id)),
+                    'channel': self.__bytes_to_dbus_byte_array(
+                                self.__fmt_to_bytes(">l", self.wpan.channel)),
+                    'xpan_id': self.__bytes_to_dbus_byte_array(
+                                self.__fmt_to_bytes(">Q", self.wpan.xpan_id)),
+                    'mesh_ipv6': self.__bytes_to_dbus_byte_array(
+                                bytes(self.wpan.mesh_ipv6)),
+                    'masterkey': self.__bytes_to_dbus_byte_array(
+                                bytes(self.wpan.masterkey))
                 }
             }
         else:
