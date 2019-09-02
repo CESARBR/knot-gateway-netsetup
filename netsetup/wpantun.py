@@ -37,20 +37,41 @@ class WpanClient(object):
     __metaclass__ = Singleton
 
     bus = None
-    iface = None
-    iface_state = None
-
-    state = ""
-    node_type = ""
-    network_name = ""
-    pan_id = 0
-    channel = 0
-    xpan_id = ""
-    mesh_ipv6 = ""
-    masterkey = ""
 
     def __init__(self):
         self.bus = dbus.SystemBus()
+        self.iface = None
+        self.iface_state = None
+        self.signal_match = None
+        self.state = ""
+        self.node_type = ""
+        self.network_name = ""
+        self.pan_id = 0
+        self.channel = 0
+        self.xpan_id = ""
+        self.mesh_ipv6 = ""
+        self.masterkey = ""
+
+    def start(self):
+        self.bus.watch_name_owner(
+            INTERFACE_SERVICE_DBUS, self._on_name_owner_changed)
+
+    def _on_name_owner_changed(self, newOwner):
+        if not newOwner:
+            logging.info("wpantund is down")
+            self._stop_monitor_properties_changes()
+        else:
+            logging.info("wpantund is up")
+            self._start_monitor_properties_changes()
+
+    def _stop_monitor_properties_changes(self):
+        if self.signal_match:
+            self.signal_match.remove()
+        self.iface = None
+        self.iface_state = None
+        self.state = ""
+
+    def _start_monitor_properties_changes(self):
         self.iface = self.bus.get_object(
             INTERFACE_SERVICE_DBUS,
             INTERFACE_DBUS_PATH)
@@ -60,13 +81,14 @@ class WpanClient(object):
             "/com/nestlabs/WPANTunnelDriver/wpan0/Properties/NCP/State")
 
         self.refresh_values()
-        self._register_signals_listener()
-
-    def _register_signals_listener(self):
-        self.iface_state.connect_to_signal(
+        self.signal_match = self.iface_state.connect_to_signal(
             "PropertyChanged", self.refresh_values())
 
+    def is_associated(self):
+        return self.state == "associated"
+
     def refresh_values(self):
+        # FIXME: Wait to interface 'wpan0' be added
         status = self.iface.Status(dbus_interface=INTERFACE_DBUS)
 
         self.state = status.get("NCP:State")

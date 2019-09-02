@@ -83,6 +83,11 @@ def main():
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
         wpan_inst = WpanClient()
+        try:
+            wpan_inst.start()
+        except dbus.exceptions.DBusException as err:
+            logging.error(err)
+            logging.error('Waiting for service init')
         connman_inst = ConnmanClient()
         ble_inst = BleService(wpan_inst, connman_inst, args.ad_name)
         dbus_inst = DbusService(wpan_inst)

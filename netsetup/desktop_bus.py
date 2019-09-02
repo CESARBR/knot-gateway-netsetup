@@ -63,7 +63,7 @@ class OpenthreadBus(dbus.service.Object):
         """
             Get all properties method
         """
-        if self.wpan is not None:
+        if self.wpan.is_associated():
             return {
                 OPENTHREAD_IFACE: {
                     'network_name': self.__bytes_to_dbus_byte_array(

@@ -40,7 +40,7 @@ class OpenthreadChannelCharacteristic(Characteristic):
     def __init__(self, bus, index, service, wpantun):
         Characteristic.__init__(self, bus, index, self.CHANNEL_CHRC_UUID,
                                 ["read"], service)
-        if wpantun is not None:
+        if wpantun.is_associated():
             self.value = dbus.Array(
                 dbus.Byte(i) for i in struct.pack(">l", wpantun.channel))
         else:
@@ -58,7 +58,7 @@ class OpenthreadNameCharacteristic(Characteristic):
     def __init__(self, bus, index, service, wpantun):
         Characteristic.__init__(self, bus, index, self.NAME_CHRC_UUID,
                                 ["read"], service)
-        if wpantun is not None:
+        if wpantun.is_associated():
             self.value = dbus.Array(
                 dbus.Byte(i) for i in bytes(wpantun.network_name))
         else:
@@ -75,7 +75,7 @@ class OpenthreadPanIDCharacteristic(Characteristic):
     def __init__(self, bus, index, service, wpantun):
         Characteristic.__init__(self, bus, index, self.PANID_CHRC_UUID,
                                 ["read"], service)
-        if wpantun is not None:
+        if wpantun.is_associated():
             self.value = dbus.Array(
                 dbus.Byte(i) for i in struct.pack(">H", wpantun.pan_id))
         else:
@@ -92,7 +92,7 @@ class OpenthreadXPanIDCharacteristic(Characteristic):
     def __init__(self, bus, index, service, wpantun):
         Characteristic.__init__(self, bus, index, self.XPANID_CHRC_UUID,
                                 ["read"], service)
-        if wpantun is not None:
+        if wpantun.is_associated():
             self.value = dbus.Array(
                 dbus.Byte(i) for i in struct.pack(">Q", wpantun.xpan_id))
         else:
@@ -110,7 +110,7 @@ class OpenthreadMasterKeyCharacteristic(Characteristic):
     def __init__(self, bus, index, service, wpantun):
         Characteristic.__init__(self, bus, index, self.MASTERKEY_CHRC_UUID,
                                 ["read"], service)
-        if wpantun is not None:
+        if wpantun.is_associated():
             self.value = dbus.Array(
                 dbus.Byte(i) for i in bytes(wpantun.masterkey))
         else:
@@ -128,7 +128,7 @@ class OpenthreadStateCharacteristic(Characteristic):
     def __init__(self, bus, index, service, wpantun):
         Characteristic.__init__(self, bus, index, self.STATE_CHRC_UUID,
                                 ["read"], service)
-        if wpantun is not None:
+        if wpantun.is_associated():
             self.value = dbus.Array(
                 dbus.Byte(i) for i in bytes(wpantun.state))
         else:
@@ -145,7 +145,7 @@ class OpenthreadMeshIPv6Characteristic(Characteristic):
     def __init__(self, bus, index, service, wpantun):
         Characteristic.__init__(self, bus, index, self.MESHIPV6_CHRC_UUID,
                                 ["read"], service)
-        if wpantun is not None:
+        if wpantun.is_associated():
             self.value = dbus.Array(
                 dbus.Byte(i) for i in bytes(wpantun.mesh_ipv6))
         else:
