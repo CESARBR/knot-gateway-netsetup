@@ -17,6 +17,7 @@ logging.basicConfig(format='[%(levelname)s] %(funcName)s: %(message)s\n',
 INTERFACE_SERVICE_DBUS = "com.nestlabs.WPANTunnelDriver"
 INTERFACE_DBUS = "org.wpantund.v1"
 INTERFACE_DBUS_PATH = "/org/wpantund/wpan0"
+WPANTUNNEL_PATH = "/com/nestlabs/WPANTunnelDriver"
 
 
 class Singleton(type):
@@ -62,7 +63,7 @@ class WpanClient(object):
             self._stop_monitor_properties_changes()
         else:
             logging.info("wpantund is up")
-            self._start_monitor_properties_changes()
+            self._wait_for_tunnel_add_interface()
 
     def _stop_monitor_properties_changes(self):
         if self.signal_match:
@@ -71,6 +72,18 @@ class WpanClient(object):
         self.iface_state = None
         self.state = ""
 
+    def _wait_for_tunnel_add_interface(self):
+        iface = None
+        self.tunnel_iface = self.bus.get_object(
+            INTERFACE_SERVICE_DBUS,
+            WPANTUNNEL_PATH
+        )
+
+        while not iface:
+            for ifaces in self.tunnel_iface.GetInterfaces():
+                iface, _ = ifaces
+        self._start_monitor_properties_changes()
+
     def _start_monitor_properties_changes(self):
         self.iface = self.bus.get_object(
             INTERFACE_SERVICE_DBUS,
@@ -78,7 +91,7 @@ class WpanClient(object):
 
         self.iface_state = self.bus.get_object(
             INTERFACE_SERVICE_DBUS,
-            "/com/nestlabs/WPANTunnelDriver/wpan0/Properties/NCP/State")
+            WPANTUNNEL_PATH + "/wpan0/Properties/NCP/State")
 
         self.refresh_values()
         self.signal_match = self.iface_state.connect_to_signal(
@@ -88,7 +101,6 @@ class WpanClient(object):
         return self.state == "associated"
 
     def refresh_values(self):
-        # FIXME: Wait to interface 'wpan0' be added
         status = self.iface.Status(dbus_interface=INTERFACE_DBUS)
 
         self.state = status.get("NCP:State")
